@@ -33,9 +33,8 @@ class DetectLogic:
             for image in images_with_lps:
                 im = Image.open(image)
                 prediction = ocr.predict(im, model)
-                print(prediction)
-                # TODO validate LP
-        # TODO reduce images, write to db
+                lp_valid = self.is_lp_valid(prediction)
+        # TODO reduce images, write to db, write field if LP is valid or not
 
     def reduce_detected_images(self):
         files = [file for file in os.listdir(self.settings["results_dir"])
@@ -56,5 +55,10 @@ class DetectLogic:
             for f in files_to_delete:
                 os.remove(self.settings["results_dir"] + "/" + f)
 
-    def validate_lp_prediction(self):
-        pass
+    @staticmethod
+    def is_lp_valid(lp):
+        lp_regex = r"[ABCEHKMOPTXY]{1,2}\s\d{4}\s[ABCEHKMOPTXY]{2}"
+        res = re.match(lp_regex, lp)
+        if res:
+            return True
+        return False

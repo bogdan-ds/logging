@@ -99,9 +99,8 @@ class YoloDetector:
 
             # Process detections
             for i, det in enumerate(pred):  # detections per image
-                p, s, im0, frame = path, '', im0s, getattr(dataset, 'frame', 0)
+                _, s, im0, frame = path, '', im0s, getattr(dataset, 'frame', 0)
 
-                p = Path(p)  # to Path
                 if len(det):
                     # Rescale boxes from img_size to im0 size
                     det[:, :4] = scale_coords(img.shape[2:],

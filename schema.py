@@ -1,8 +1,7 @@
 import uuid
 
 from sqlalchemy import Column, Integer, String, DateTime, \
-    Boolean, Text, ForeignKey, create_engine
-from sqlalchemy.orm import relationship
+    Boolean, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 
 engine = create_engine('sqlite:///logging.db', echo=True)
@@ -17,4 +16,5 @@ class Trucks(Base):
     original_filename = Column(String)
     image_uuid = Column(String, default=uuid.uuid4())
     license_plate = Column(String)
+    valid_license_place = Column(Boolean)
     license_plate_bb = Column(String)

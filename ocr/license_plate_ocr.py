@@ -51,10 +51,10 @@ class OCRecognizer:
         batch_size = image_tensors.size(0)
         text_for_pred = torch.LongTensor(
             batch_size, self.opt.batch_max_length + 1).fill_(0).to(self.device)
-        preds = model(image_tensors, text_for_pred)
-        preds_size = torch.IntTensor([preds.size(1)] * batch_size)
-        _, preds_index = preds.max(2)
-        preds_index = preds_index.view(-1)
-        preds_str = self.converter.decode_greedy(preds_index.data,
-                                                 preds_size.data)
-        return preds_str
+        predictions = model(image_tensors, text_for_pred)
+        predictions_size = torch.IntTensor([predictions.size(1)] * batch_size)
+        _, predictions_index = predictions.max(2)
+        predictions_index = predictions_index.view(-1)
+        prediction_string = self.converter.decode_greedy(predictions_index.data,
+                                                         predictions_size.data)
+        return prediction_string

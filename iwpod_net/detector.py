@@ -18,14 +18,14 @@ def iwpod_detect(image_dir, conf_thres=0.35):
         ocr_input_size = [80, 240]
         iwpod_net = load_model(os.path.join(package_directory,
                                             "weights", "iwpod_net"))
-        Ivehicle = cv2.imread(image_dir + "/" + image)
+        input_vehicle = cv2.imread(image_dir + "/" + image)
 
-        ASPECTRATIO = 1
-        WPODResolution = 640  # larger if full image is used directly
+        aspect_ration = 1
+        wpod_resolution = 640  # larger if full image is used directly
         lp_output_resolution = tuple(ocr_input_size[::-1])
         detections, images, _ = detect_lp_width(iwpod_net,
-                                                im2single(Ivehicle),
-                                                WPODResolution*ASPECTRATIO,
+                                                im2single(input_vehicle),
+                                                wpod_resolution*aspect_ration,
                                                 2**4,
                                                 lp_output_resolution,
                                                 conf_thres)
