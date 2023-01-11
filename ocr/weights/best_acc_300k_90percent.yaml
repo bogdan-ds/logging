@@ -1,0 +1,8 @@
+input_channel: 3
+output_channel: 256
+hidden_size: 256
+imgH: 80
+imgW: 240
+character_list: " 0123456789ABCEHKMOPTXY"
+Prediction: "CTC"
+batch_max_length: 8
