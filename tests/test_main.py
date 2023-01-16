@@ -1,9 +1,18 @@
+import pytest
 import os
 
 from logtrucks.main import DetectLogic
 
 
 save_dir = "tests/assets/save_dir"
+
+
+@pytest.fixture
+def teardown():
+    yield
+    files = os.listdir(save_dir)
+    for file in files:
+        os.remove(save_dir + "/" + file)
 
 
 def test_lp_validation():
@@ -15,14 +24,22 @@ def test_lp_validation():
         assert DetectLogic.is_lp_valid(lp) is not True
 
 
-def test_reduce_detected_frames():
+def test_reduce_detected_frames(teardown):
     detector = DetectLogic(settings="tests/test_settings.yaml")
     detector.start_detections("tests/assets/clip2.mp4")
     files = os.listdir(save_dir)
     assert len(files) == 3
-    for file in files:
-        os.remove(save_dir + "/" + file)
 
 
-def test_if_invalid_iwpod_outputs_are_kept():
-    pass
+def test_if_invalid_iwpod_outputs_kept(teardown):
+    detector = DetectLogic(settings="tests/test_settings.yaml")
+    detector.start_detections("tests/assets/iwpod_wrong_detection.jpg")
+    files = os.listdir(save_dir)
+    assert len(files) == 1
+
+
+def test_if_valid_lps_processed(teardown):
+    detector = DetectLogic(settings="tests/test_settings.yaml")
+    detector.start_detections("tests/assets/127.jpeg")
+    files = os.listdir(save_dir)
+    assert len(files) == 2

@@ -133,6 +133,7 @@ class YoloDetector:
             self._reset_detection_values(frame)
             print(f"No last frame, setting values: "
                   f"{str(self.current_detection_id)}")
+            self._save_frame(image, frame)
         elif frame == self.detection_start_frame:
             pass
         elif frame != self.detection_start_frame and \

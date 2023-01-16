@@ -4,11 +4,12 @@ import torch
 import yaml
 
 from logtrucks.yolo.detect import YoloDetector
+from tests.test_main import teardown
 
 settings = yaml.safe_load(open("tests/test_settings.yaml"))
 
 
-def test_detect_logtruck():
+def test_detect_logtruck(teardown):
     with torch.no_grad():
         detector = YoloDetector(source="tests/assets/127.jpeg",
                                 weights=settings["yolo_weights"],
@@ -17,7 +18,7 @@ def test_detect_logtruck():
         assert '1 logs' in result
 
 
-def test_detect_no_logtruck():
+def test_detect_no_logtruck(teardown):
     with torch.no_grad():
         detector = YoloDetector(source="tests/assets/notruck.jpg",
                                 weights=settings["yolo_weights"],
@@ -26,7 +27,7 @@ def test_detect_no_logtruck():
         assert '' == result
 
 
-def test_frame_detect_logic():
+def test_frame_detect_logic(teardown):
     with torch.no_grad():
         detector = YoloDetector(source="tests/assets/clip2.mp4",
                                 weights=settings["yolo_weights"],
@@ -35,5 +36,3 @@ def test_frame_detect_logic():
     uuids = set([filename.split("_")[0] for filename in
                  os.listdir(settings["results_dir"])])
     assert len(uuids) == 1
-    for filename in os.listdir(settings["results_dir"]):
-        os.remove(settings["results_dir"] + "/" + filename)
