@@ -8,13 +8,13 @@ engine = create_engine('sqlite:///logtrucks.db', echo=True)
 Base = declarative_base()
 
 
-class Trucks(Base):
+class Detections(Base):
     __tablename__ = 'trucks'
     id = Column(Integer, primary_key=True)
     ingestion_date = Column(DateTime)
     acquisition_date = Column(DateTime)
-    original_filename = Column(String)
+    source_filename = Column(String)
+    gdrive_file_id = Column(String)
     image_uuid = Column(String, default=uuid.uuid4())
-    license_plate = Column(String)
-    valid_license_place = Column(Boolean)
-    license_plate_bb = Column(String)
+    license_plate_prediction = Column(String)
+    time_first_detected = Column(String)

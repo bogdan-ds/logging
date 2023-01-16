@@ -7,7 +7,7 @@ import yaml
 from PIL import Image
 from sqlalchemy.orm import sessionmaker
 
-from logtrucks.schema import Trucks, engine
+from logtrucks.schema import Detections, engine
 from logtrucks.iwpod_net.detector import iwpod_detect
 from logtrucks.yolo.detect import YoloDetector
 from logtrucks.ocr.license_plate_ocr import OCRecognizer
@@ -24,28 +24,33 @@ class DetectLogic:
         pass
 
     def start_detections(self, source):
+        self.yolo_detect(source)
+        images_with_lps = iwpod_detect(self.settings["results_dir"])
+        if images_with_lps:
+            self.ocr(images_with_lps)
+        self.reduce_detected_images()
+        # TODO write to db
+
+    def yolo_detect(self, source):
         with torch.no_grad():
             detector = YoloDetector(source=source,
                                     weights=self.settings["yolo_weights"],
                                     save_dir=self.settings["results_dir"])
             detector.detect(conf_thres=0.45)
-        images_with_lps = iwpod_detect(self.settings["results_dir"])
-        if images_with_lps:
-            ocr = OCRecognizer(self.settings["ocr_weights"])
-            model = ocr.load_model()
-            for image in images_with_lps:
-                im = Image.open(image)
-                prediction = ocr.predict(im, model)
-                print(f"Predicted LP: {prediction[0]}")
-                lp_valid = self.is_lp_valid(prediction[0])
-                if not lp_valid:
-                    os.remove(image)
-                else:
-                    os.rename(image,
-                              f'{self.settings["results_dir"]}/_'
-                              f'{prediction[0].replace(" ", "")}_.lpr.jpg')
-        self.reduce_detected_images()
-        # TODO write to db
+
+    def ocr(self, images_with_lps):
+        ocr = OCRecognizer(self.settings["ocr_weights"])
+        model = ocr.load_model()
+        for image in images_with_lps:
+            im = Image.open(image)
+            prediction = ocr.predict(im, model)
+            lp_valid = self.is_lp_valid(prediction[0])
+            if not lp_valid:
+                os.remove(image)
+            else:
+                os.rename(image,
+                          f'{self.settings["results_dir"]}/_'
+                          f'{prediction[0].replace(" ", "")}_.lpr.jpg')
 
     def reduce_detected_images(self):
         files = [file for file in os.listdir(self.settings["results_dir"])
