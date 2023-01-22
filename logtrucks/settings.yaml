@@ -5,3 +5,6 @@ results_dir: "res"
 
 yolo_weights: "very-good-best.pt"
 ocr_weights: "best_acc_300k_90percent"
+write_to_db: False
+
+rename_lp_image: True

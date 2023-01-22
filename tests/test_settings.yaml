@@ -5,3 +5,6 @@ results_dir: "tests/assets/save_dir"
 
 yolo_weights: "very-good-best.pt"
 ocr_weights: "best_acc_300k_90percent"
+write_to_db: True
+
+rename_lp_image: True

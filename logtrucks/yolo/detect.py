@@ -1,3 +1,4 @@
+import datetime
 import os
 import time
 from uuid import uuid4
@@ -6,7 +7,9 @@ from pathlib import Path
 import cv2
 import torch
 from numpy import random
+from sqlalchemy.orm import sessionmaker
 
+from logtrucks.schema import Detections, engine
 from logtrucks.yolo.utils.datasets import LoadImages
 from logtrucks.yolo.utils.general import check_img_size, non_max_suppression, \
     scale_coords, set_logging
@@ -21,16 +24,19 @@ class YoloDetector:
 
     def __init__(self, source, weights,
                  device="", save_dir="res",
-                 detection_max_frame_length=50, detection_frame_buffer=5):
+                 detection_max_frame_length=50, detection_frame_buffer=5,
+                 gdrive_id=None):
         self.source = source
         self.weights = os.path.join(package_directory, "weights", weights)
         self.device = device
         self.save_dir = save_dir
         self.detection_max_frame_length = detection_max_frame_length
         self.detection_frame_buffer = detection_frame_buffer
+        self.gdrive_id = gdrive_id
         self.detection_start_frame = 0
         self.detection_last_frame = 0
         self.current_detection_id = None
+        self.cap = None
 
     def detect(self,
                imgsz=640,
@@ -58,6 +64,7 @@ class YoloDetector:
 
         # Set Dataloader
         dataset = LoadImages(self.source, img_size=imgsz, stride=stride)
+        self.cap = dataset.cap
 
         # Get names and colors
         names = model.module.names if hasattr(model, 'module') else model.names
@@ -131,9 +138,9 @@ class YoloDetector:
     def _detect_logic(self, image, frame):
         if not self.detection_last_frame:
             self._reset_detection_values(frame)
-            print(f"No last frame, setting values: "
-                  f"{str(self.current_detection_id)}")
             self._save_frame(image, frame)
+            self._save_to_db(self.source, frame,
+                             self.current_detection_id)
         elif frame == self.detection_start_frame:
             pass
         elif frame != self.detection_start_frame and \
@@ -145,12 +152,9 @@ class YoloDetector:
         elif frame > (self.detection_last_frame +
                       self.detection_max_frame_length):
             self._reset_detection_values(frame)
-            print(f"Detection after max length, setting values: "
-                  f"{str(self.current_detection_id)}, "
-                  f"last frame: {self.detection_last_frame}")
 
     def _reset_detection_values(self, frame):
-        self.current_detection_id = uuid4()
+        self.current_detection_id = str(uuid4())
         self.detection_start_frame = frame
         self.detection_last_frame = frame
 
@@ -159,4 +163,21 @@ class YoloDetector:
         save_path = self.save_dir + "/" + str(
             self.current_detection_id) + "_" + str(frame) + ".jpg"
         cv2.imwrite(save_path, image)
-        print(f"Saving frame to {save_path}")
+
+    def _save_to_db(self, filename, frame, uuid):
+        timestamp = self.get_frame_timestamp(frame) if self.cap else None
+        detection = Detections(
+            id=uuid,
+            ingestion_date=datetime.datetime.now(),
+            source_filename=filename,
+            gdrive_file_id=self.gdrive_id,
+            time_first_detected=timestamp
+        )
+        session = sessionmaker(bind=engine)
+        session = session()
+        session.add(detection)
+        session.commit()
+
+    def get_frame_timestamp(self, frame):
+        fps = self.cap.get(cv2.CAP_PROP_FPS)
+        return frame / fps
