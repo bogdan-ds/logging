@@ -1,13 +1,12 @@
 import re
 import os
 import statistics
-import torch
 import yaml
 
 from logtrucks.iwpod_net.detector import iwpod_detect
 from logtrucks.yolo.detect import YoloDetector
 from logtrucks.ocr.license_plate_ocr import OCRecognizer
-from logtrucks.utils import is_lp_valid, get_uuid_from_filename
+from logtrucks.utils import get_uuid_from_filename
 
 
 class DetectLogic:
@@ -26,12 +25,10 @@ class DetectLogic:
         self.reduce_detected_images()
 
     def yolo_detect(self, source, gdrive_id=None):
-        with torch.no_grad():
-            detector = YoloDetector(source=source,
-                                    weights=self.settings["yolo_weights"],
-                                    save_dir=self.settings["results_dir"],
-                                    gdrive_id=gdrive_id)
-            detector.detect(conf_thres=0.45)
+        detector = YoloDetector(source=source,
+                                settings=self.settings,
+                                gdrive_id=gdrive_id)
+        detector.detect(conf_thres=0.45)
 
     def ocr(self, images_with_lps):
         ocr = OCRecognizer(self.settings)

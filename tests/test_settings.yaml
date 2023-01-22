@@ -1,6 +1,7 @@
 gdrive_credentials: "None"
 gdrive_directory: "None"
-frames_after_detection: 200
+detection_max_frame_length: 50
+detection_frame_buffer: 5
 results_dir: "tests/assets/save_dir"
 
 yolo_weights: "very-good-best.pt"

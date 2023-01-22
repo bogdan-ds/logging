@@ -22,16 +22,16 @@ package_directory = os.path.dirname(os.path.abspath(__file__))
 
 class YoloDetector:
 
-    def __init__(self, source, weights,
-                 device="", save_dir="res",
-                 detection_max_frame_length=50, detection_frame_buffer=5,
-                 gdrive_id=None):
+    def __init__(self, source, settings,
+                 device="", gdrive_id=None):
         self.source = source
-        self.weights = os.path.join(package_directory, "weights", weights)
+        self.settings = settings
+        self.weights = os.path.join(package_directory, "weights",
+                                    settings["yolo_weights"])
         self.device = device
-        self.save_dir = save_dir
-        self.detection_max_frame_length = detection_max_frame_length
-        self.detection_frame_buffer = detection_frame_buffer
+        self.save_dir = settings["results_dir"]
+        self.detection_max_frame_length = settings["detection_max_frame_length"]
+        self.detection_frame_buffer = settings["detection_frame_buffer"]
         self.gdrive_id = gdrive_id
         self.detection_start_frame = 0
         self.detection_last_frame = 0
@@ -78,69 +78,71 @@ class YoloDetector:
         old_img_b = 1
 
         t0 = time.time()
-        for path, img, im0s, vid_cap in dataset:
-            img = torch.from_numpy(img).to(device)
-            img = img.half() if half else img.float()  # uint8 to fp16/32
-            img /= 255.0  # 0 - 255 to 0.0 - 1.0
-            if img.ndimension() == 3:
-                img = img.unsqueeze(0)
+        with torch.no_grad():
+            for path, img, im0s, vid_cap in dataset:
+                img = torch.from_numpy(img).to(device)
+                img = img.half() if half else img.float()  # uint8 to fp16/32
+                img /= 255.0  # 0 - 255 to 0.0 - 1.0
+                if img.ndimension() == 3:
+                    img = img.unsqueeze(0)
 
-            # Warmup
-            if device.type != 'cpu' and (old_img_b != img.shape[0] or
-                                         old_img_h != img.shape[2] or
-                                         old_img_w != img.shape[3]):
-                old_img_b = img.shape[0]
-                old_img_h = img.shape[2]
-                old_img_w = img.shape[3]
-                for i in range(3):
-                    model(img)[0]
+                # Warmup
+                if device.type != 'cpu' and (old_img_b != img.shape[0] or
+                                             old_img_h != img.shape[2] or
+                                             old_img_w != img.shape[3]):
+                    old_img_b = img.shape[0]
+                    old_img_h = img.shape[2]
+                    old_img_w = img.shape[3]
+                    for i in range(3):
+                        model(img)[0]
 
-            # Inference
-            t1 = time_synchronized()
-            pred = model(img)[0]
-            t2 = time_synchronized()
+                # Inference
+                t1 = time_synchronized()
+                pred = model(img)[0]
+                t2 = time_synchronized()
 
-            # Apply NMS
-            pred = non_max_suppression(pred, conf_thres, iou_thres)
-            t3 = time_synchronized()
+                # Apply NMS
+                pred = non_max_suppression(pred, conf_thres, iou_thres)
+                t3 = time_synchronized()
 
-            # Process detections
-            for i, det in enumerate(pred):  # detections per image
-                _, s, im0, frame = path, '', im0s, getattr(dataset, 'frame', 0)
+                # Process detections
+                for i, det in enumerate(pred):  # detections per image
+                    _, s, im0, frame = path, '', im0s, getattr(dataset, 'frame', 0)
 
-                if len(det):
-                    # Rescale boxes from img_size to im0 size
-                    det[:, :4] = scale_coords(img.shape[2:],
-                                              det[:, :4],
-                                              im0.shape).round()
+                    if len(det):
+                        # Rescale boxes from img_size to im0 size
+                        det[:, :4] = scale_coords(img.shape[2:],
+                                                  det[:, :4],
+                                                  im0.shape).round()
 
-                    # Print results
-                    for c in det[:, -1].unique():
-                        n = (det[:, -1] == c).sum()  # detections per class
-                        s += f"{n} {names[int(c)]}, "  # add to string
+                        # Print results
+                        for c in det[:, -1].unique():
+                            n = (det[:, -1] == c).sum()  # detections per class
+                            s += f"{n} {names[int(c)]}, "  # add to string
 
-                    # Write results to image;
-                    # maybe not a good idea for LP detection
-                    #for *xyxy, conf, cls in reversed(det):
-                    #    # Add bbox to image
-                    #    label = f'{names[int(cls)]} {conf:.2f}'
-                    #    plot_one_box(xyxy, im0, label=label,
-                    #                 color=colors[int(cls)], line_thickness=1)
-                    self._detect_logic(im0, frame)
+                        # Write results to image;
+                        # maybe not a good idea for LP detection
+                        #for *xyxy, conf, cls in reversed(det):
+                        #    # Add bbox to image
+                        #    label = f'{names[int(cls)]} {conf:.2f}'
+                        #    plot_one_box(xyxy, im0, label=label,
+                        #                 color=colors[int(cls)], line_thickness=1)
+                        self._detect_logic(im0, frame)
 
-                # Print time (inference + NMS)
-                print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) '
-                      f'Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
+                    # Print time (inference + NMS)
+                    print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) '
+                          f'Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
 
-        print(f'Done. ({time.time() - t0:.3f}s)')
+            print(f'Done. ({time.time() - t0:.3f}s)')
         return s
 
     def _detect_logic(self, image, frame):
         if not self.detection_last_frame:
             self._reset_detection_values(frame)
             self._save_frame(image, frame)
-            self._save_to_db(self.source, frame,
-                             self.current_detection_id)
+            if self.settings["write_to_db"]:
+                self._save_to_db(self.source, frame,
+                                 self.current_detection_id)
         elif frame == self.detection_start_frame:
             pass
         elif frame != self.detection_start_frame and \
