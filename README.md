@@ -31,8 +31,9 @@ TODO
 
 - Migrate IWPOD_NET from tensorflow to pytorch
 - Clean up IWPOD_NET code
-- Write time into video when detection appears and ends
 - Investigate TensorRT for more optimal inference
-- Google Drive client
-- Check for new items in gdrive based on DB
 - Complete readme
+- Implement logs (as in monitoring)
+- Frontend using streamlit
+- Typing
+- Add license

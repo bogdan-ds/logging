@@ -64,4 +64,10 @@ def test_frame_to_time(teardown, setup_db_session):
     detector = YoloDetector(source="tests/assets/clip2.mp4",
                             settings=settings)
     detector.detect(conf_thres=0.45)
-    # TODO complete this
+    session = setup_db_session
+    uuids = set([get_uuid_from_filename(filename) for filename in
+                 os.listdir(settings["results_dir"])])
+    assert len(uuids) == 1
+    result = session.query(Detections).filter(
+        Detections.id == list(uuids)[0])
+    assert result.first().time_first_detected is not None

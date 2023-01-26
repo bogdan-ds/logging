@@ -6,14 +6,14 @@ from pathlib import Path
 
 import cv2
 import torch
-from numpy import random
+# from numpy import random
 from sqlalchemy.orm import sessionmaker
 
 from logtrucks.schema import Detections, engine
 from logtrucks.yolo.utils.datasets import LoadImages
 from logtrucks.yolo.utils.general import check_img_size, non_max_suppression, \
     scale_coords, set_logging
-from logtrucks.yolo.utils.plots import plot_one_box
+# from logtrucks.yolo.utils.plots import plot_one_box
 from logtrucks.yolo.utils.torch_utils import select_device, time_synchronized
 
 
@@ -68,7 +68,7 @@ class YoloDetector:
 
         # Get names and colors
         names = model.module.names if hasattr(model, 'module') else model.names
-        colors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
+        # colors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
 
         # Run inference
         if device.type != 'cpu':
@@ -107,7 +107,8 @@ class YoloDetector:
 
                 # Process detections
                 for i, det in enumerate(pred):  # detections per image
-                    _, s, im0, frame = path, '', im0s, getattr(dataset, 'frame', 0)
+                    _, s, im0, frame = path, '', im0s, getattr(
+                        dataset, 'frame', 0)
 
                     if len(det):
                         # Rescale boxes from img_size to im0 size
@@ -122,7 +123,7 @@ class YoloDetector:
 
                         # Write results to image;
                         # maybe not a good idea for LP detection
-                        #for *xyxy, conf, cls in reversed(det):
+                        # for *xyxy, conf, cls in reversed(det):
                         #    # Add bbox to image
                         #    label = f'{names[int(cls)]} {conf:.2f}'
                         #    plot_one_box(xyxy, im0, label=label,

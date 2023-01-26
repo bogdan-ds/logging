@@ -1,5 +1,7 @@
-gdrive_credentials: "None"
-gdrive_directory: "None"
+enable_gdrive_source: False
+gdrive_credentials: "credentials.json"
+gdrive_directory: "1kq42jGkpQUHVa30R6QrJym7XDF3Sq82Q"
+download_directory: "tests/downloads"
 detection_max_frame_length: 50
 detection_frame_buffer: 5
 results_dir: "tests/assets/save_dir"
