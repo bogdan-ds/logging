@@ -1,4 +1,4 @@
-enable_gdrive_source: False
+enable_gdrive_source: True
 gdrive_credentials: "credentials.json"
 gdrive_directory: "1kq42jGkpQUHVa30R6QrJym7XDF3Sq82Q"
 download_directory: "tests/downloads"

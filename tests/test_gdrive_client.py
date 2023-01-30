@@ -17,12 +17,18 @@ def teardown():
         os.remove(settings["download_directory"] + "/" + file)
 
 
+@pytest.mark.skipif(settings["enable_gdrive_source"] is False,
+                    reason="enable_gdrive_source disabled "
+                           "in test settings..skipping")
 def test_gdrive_list_files():
     gdrive = GDriveClient(settings=settings)
     files = gdrive.list(f"'{settings['gdrive_directory']}' in parents")
     assert files != []
 
 
+@pytest.mark.skipif(settings["enable_gdrive_source"] is False,
+                    reason="enable_gdrive_source disabled "
+                           "in test settings..skipping")
 def test_next_page_token():
     gdrive = GDriveClient(settings=settings)
     files = gdrive.list(query="'1R0HgPqj_4OVKYk2gcIoOhqFzeWxc7r5p' in parents",
@@ -30,6 +36,9 @@ def test_next_page_token():
     assert len(files) > 2
 
 
+@pytest.mark.skipif(settings["enable_gdrive_source"] is False,
+                    reason="enable_gdrive_source disabled "
+                           "in test settings..skipping")
 def test_file_download(teardown):
     gdrive = GDriveClient(settings=settings)
     files = gdrive.list(f"'{settings['gdrive_directory']}' in parents")

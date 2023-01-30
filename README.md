@@ -37,3 +37,4 @@ TODO
 - Frontend using streamlit
 - Typing
 - Add license
+- docstrings

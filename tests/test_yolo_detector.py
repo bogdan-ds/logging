@@ -61,6 +61,7 @@ def test_write_to_db_setting(teardown, setup_db_session):
 
 
 def test_frame_to_time(teardown, setup_db_session):
+    settings["write_to_db"] = True
     detector = YoloDetector(source="tests/assets/clip2.mp4",
                             settings=settings)
     detector.detect(conf_thres=0.45)
