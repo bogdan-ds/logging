@@ -1,5 +1,6 @@
 # Detection of stacked logs and Bulgarian license plate recognition
 ![](screenshots/truck.jpg)
+
 I created this small app to help process long video files in search of logging trucks. Ideally this would aid efforts 
 to combat illegal logging. This repository includes two models which were fine-tuned by me with data collect from the 
 public photo register of the [South-Western State Enterprise](https://www.fotoregister.uzdp.bg/public). 
