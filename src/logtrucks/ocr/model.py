@@ -1,7 +1,8 @@
 import torch.nn as nn
-from logtrucks.ocr.modules.feature_extraction import VGG_FeatureExtractor
-from logtrucks.ocr.modules.sequence_modeling import BidirectionalLSTM
-from logtrucks.ocr.modules.prediction import Attention
+
+from src.logtrucks.ocr.modules.feature_extraction import VGG_FeatureExtractor
+from src.logtrucks.ocr.modules.sequence_modeling import BidirectionalLSTM
+from src.logtrucks.ocr.modules.prediction import Attention
 
 
 class Model(nn.Module):

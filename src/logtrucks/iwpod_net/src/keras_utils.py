@@ -4,9 +4,9 @@ import time
 
 from os.path import splitext
 
-from logtrucks.iwpod_net.src.label import Label
-from logtrucks.iwpod_net.src.utils import getWH, nms
-from logtrucks.iwpod_net.src.projection_utils import getRectPts, find_T_matrix
+from src.logtrucks.iwpod_net.src.label import Label
+from src.logtrucks.iwpod_net.src.utils import getWH, nms
+from src.logtrucks.iwpod_net.src.projection_utils import getRectPts, find_T_matrix
 
 
 class DLabel(Label):

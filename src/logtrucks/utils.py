@@ -1,9 +1,12 @@
 import os
 import re
 import statistics
+import yaml
+
+from typing import Union
 
 
-def is_lp_valid(lp):
+def is_lp_valid(lp: str) -> bool:
     lp_regex = r"[ABCEHKMOPTXY]{1,2}\s\d{4}\s[ABCEHKMOPTXY]{2}"
     res = re.match(lp_regex, lp)
     if res:
@@ -11,7 +14,7 @@ def is_lp_valid(lp):
     return False
 
 
-def get_uuid_from_filename(filename):
+def get_uuid_from_filename(filename: str) -> str:
     uuid_regex = r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
     for part in filename.split("_"):
         matched = re.search(uuid_regex, part)
@@ -19,7 +22,7 @@ def get_uuid_from_filename(filename):
             return matched.group(0)
 
 
-def reduce_detected_images(results_dir):
+def reduce_detected_images(results_dir: str) -> None:
     files = [file for file in os.listdir(results_dir)
              if not file.endswith(".lpr.jpg")]
     uuids = [uuid for file in files
@@ -41,3 +44,10 @@ def reduce_detected_images(results_dir):
                            and not file.endswith(".lpr.jpg")]
         for f in files_to_delete:
             os.remove(results_dir + "/" + f)
+
+
+def load_settings(settings: Union[str, dict]) -> dict:
+    if type(settings) == str:
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        settings = yaml.safe_load(open(os.path.join(current_dir, settings)))
+    return settings

@@ -4,7 +4,7 @@ import yaml
 from scipy.cluster.vq import kmeans
 from tqdm import tqdm
 
-from logtrucks.yolo.utils.general import colorstr
+from src.logtrucks.yolo.utils.general import colorstr
 
 
 def check_anchor_order(m):

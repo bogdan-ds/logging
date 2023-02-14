@@ -14,11 +14,10 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import torch
-import yaml
 from PIL import Image, ImageDraw, ImageFont
 from scipy.signal import butter, filtfilt
 
-from logtrucks.yolo.utils.general import xywh2xyxy, xyxy2xywh
+from src.logtrucks.yolo.utils.general import xywh2xyxy, xyxy2xywh
 
 # Settings
 matplotlib.rc('font', **{'size': 11})

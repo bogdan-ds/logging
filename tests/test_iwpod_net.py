@@ -1,9 +1,6 @@
 import os
-import yaml
 
 from logtrucks.iwpod_net.detector import iwpod_detect
-
-settings = yaml.safe_load(open("logtrucks/settings.yaml"))
 
 
 def test_lp_detection():

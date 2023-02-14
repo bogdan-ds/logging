@@ -6,15 +6,17 @@ from pathlib import Path
 
 import cv2
 import torch
+import numpy as np
 # from numpy import random
 from sqlalchemy.orm import sessionmaker
 
-from logtrucks.schema import Detections, engine
-from logtrucks.yolo.utils.datasets import LoadImages
-from logtrucks.yolo.utils.general import check_img_size, non_max_suppression, \
-    scale_coords, set_logging
-# from logtrucks.yolo.utils.plots import plot_one_box
-from logtrucks.yolo.utils.torch_utils import select_device, time_synchronized
+from src.logtrucks.schema import Detections, engine
+from src.logtrucks.yolo.utils.datasets import LoadImages
+from src.logtrucks.yolo.utils.general import check_img_size, \
+    non_max_suppression, scale_coords, set_logging
+# from src.logtrucks.yolo.utils.plots import plot_one_box
+from src.logtrucks.yolo.utils.torch_utils import select_device, \
+    time_synchronized
 
 
 package_directory = os.path.dirname(os.path.abspath(__file__))
@@ -22,8 +24,8 @@ package_directory = os.path.dirname(os.path.abspath(__file__))
 
 class YoloDetector:
 
-    def __init__(self, source, settings,
-                 device="", gdrive_id=None):
+    def __init__(self, source: str, settings: dict,
+                 device: str = "", gdrive_id: str = None):
         self.source = source
         self.settings = settings
         self.weights = os.path.join(package_directory, "weights",
@@ -39,9 +41,9 @@ class YoloDetector:
         self.cap = None
 
     def detect(self,
-               imgsz=640,
-               conf_thres=0.25,
-               iou_thres=0.45):
+               imgsz: int = 640,
+               conf_thres: float = 0.25,
+               iou_thres: float = 0.45) -> str:
 
         save_dir = Path(self.save_dir)
         save_dir.mkdir(parents=True, exist_ok=True)
@@ -137,7 +139,7 @@ class YoloDetector:
             print(f'Done. ({time.time() - t0:.3f}s)')
         return s
 
-    def _detect_logic(self, image, frame):
+    def _detect_logic(self, image: np.ndarray, frame: int) -> None:
         if not self.detection_last_frame:
             self._reset_detection_values(frame)
             self._save_frame(image, frame)
@@ -156,18 +158,18 @@ class YoloDetector:
                       self.detection_max_frame_length):
             self._reset_detection_values(frame)
 
-    def _reset_detection_values(self, frame):
+    def _reset_detection_values(self, frame: int) -> None:
         self.current_detection_id = str(uuid4())
         self.detection_start_frame = frame
         self.detection_last_frame = frame
 
-    def _save_frame(self, image, frame):
+    def _save_frame(self, image: np.ndarray, frame: int) -> None:
         self.detection_last_frame = frame
         save_path = self.save_dir + "/" + str(
             self.current_detection_id) + "_" + str(frame) + ".jpg"
         cv2.imwrite(save_path, image)
 
-    def _save_to_db(self, filename, frame, uuid):
+    def _save_to_db(self, filename: str, frame: int, uuid: str) -> None:
         timestamp = self.get_frame_timestamp(frame) if self.cap else None
         detection = Detections(
             id=uuid,
@@ -181,6 +183,6 @@ class YoloDetector:
         session.add(detection)
         session.commit()
 
-    def get_frame_timestamp(self, frame):
+    def get_frame_timestamp(self, frame: int) -> float:
         fps = self.cap.get(cv2.CAP_PROP_FPS)
         return frame / fps

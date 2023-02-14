@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from logtrucks.yolo.utils.general import bbox_iou, box_iou, xywh2xyxy
-from logtrucks.yolo.utils.torch_utils import is_parallel
+from src.logtrucks.yolo.utils.general import bbox_iou, box_iou, xywh2xyxy
+from src.logtrucks.yolo.utils.torch_utils import is_parallel
 
 
 def smooth_BCE(eps=0.1):

@@ -9,6 +9,8 @@ from typing import Optional
 from PIL import Image
 from io import BytesIO
 
+from src.logtrucks.utils import load_settings, get_uuid_from_filename
+
 
 @st.cache
 def load_data() -> str:
@@ -41,10 +43,11 @@ def add_images_column_to_df(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def image_column(uuid: str) -> Optional[str]:
-    images = find_images_from_uuid(uuid, "results")
+    settings = load_settings("settings.yaml")
+    images = find_images_from_uuid(uuid, settings["results_dir"])
     if not images:
         return None
-    image = image_formatter(f"results/{images[0]}")
+    image = image_formatter(f"{settings['results_dir']}/{images[0]}")
     return image
 
 
@@ -52,7 +55,7 @@ def find_images_from_uuid(uuid: str, results_dir: str) -> list:
     files = [file for file in os.listdir(results_dir)
              if not file.endswith(".lpr.jpg")]
     images = [filename for filename in files
-              if filename.split("_")[0] == uuid]
+              if get_uuid_from_filename(filename) == uuid]
     return images
 
 

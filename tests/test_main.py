@@ -31,28 +31,28 @@ def teardown():
 
 
 def test_reduce_detected_frames(teardown):
-    detector = DetectLogic(settings="tests/test_settings.yaml")
+    detector = DetectLogic(settings=settings)
     detector.start_detections("tests/assets/clip2.mp4")
     files = os.listdir(settings["results_dir"])
     assert len(files) == 3
 
 
 def test_if_invalid_iwpod_outputs_kept(teardown):
-    detector = DetectLogic(settings="tests/test_settings.yaml")
+    detector = DetectLogic(settings=settings)
     detector.start_detections("tests/assets/iwpod_wrong_detection.jpg")
     files = os.listdir(settings["results_dir"])
     assert len(files) == 1
 
 
 def test_if_valid_lps_saved(teardown):
-    detector = DetectLogic(settings="tests/test_settings.yaml")
+    detector = DetectLogic(settings=settings)
     detector.start_detections("tests/assets/127.jpeg")
     files = os.listdir(settings["results_dir"])
     assert len(files) == 2
 
 
 def test_write_all_results_to_db(teardown, setup_db_session):
-    detector = DetectLogic(settings="tests/test_settings.yaml")
+    detector = DetectLogic(settings=settings)
     detector.start_detections("tests/assets/127.jpeg")
     session = setup_db_session
     files = os.listdir(detector.settings["results_dir"])
@@ -68,7 +68,7 @@ def test_process_new_items(teardown, setup_db_session):
     session = setup_db_session
     session.query(Detections).delete()
     session.commit()
-    detector = GDriveDetectLogic(settings="tests/test_settings.yaml")
+    detector = GDriveDetectLogic(settings=settings)
     detector.process_new_items()
     uuids = set([uuid for filename in os.listdir(settings["results_dir"])
                  if (uuid := get_uuid_from_filename(filename)) is not None])

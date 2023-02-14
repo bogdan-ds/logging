@@ -3,13 +3,13 @@ import logging
 import sys
 from copy import deepcopy
 
-from logtrucks.models.common import *
-from logtrucks.yolo.utils.autoanchor import check_anchor_order
-from logtrucks.yolo.utils.general import make_divisible, check_file, set_logging
-from logtrucks.yolo.utils.torch_utils import time_synchronized, fuse_conv_and_bn, \
+from src.logtrucks.models.common import *
+from src.logtrucks.yolo.utils.autoanchor import check_anchor_order
+from src.logtrucks.yolo.utils.general import make_divisible, check_file, set_logging
+from src.logtrucks.yolo.utils.torch_utils import time_synchronized, fuse_conv_and_bn, \
     model_info, scale_img, initialize_weights, \
     select_device, copy_attr
-from logtrucks.yolo.utils.loss import SigmoidBin
+from src.logtrucks.yolo.utils.loss import SigmoidBin
 
 try:
     import thop  # for FLOPS computation

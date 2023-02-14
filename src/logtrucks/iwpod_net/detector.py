@@ -2,15 +2,15 @@ import os
 
 import cv2
 
-from logtrucks.iwpod_net.src.keras_utils import load_model
-from logtrucks.iwpod_net.src.keras_utils import detect_lp_width
-from logtrucks.iwpod_net.src.utils import im2single
+from src.logtrucks.iwpod_net.src.keras_utils import load_model
+from src.logtrucks.iwpod_net.src.keras_utils import detect_lp_width
+from src.logtrucks.iwpod_net.src.utils import im2single
 
 
 package_directory = os.path.dirname(os.path.abspath(__file__))
 
 
-def iwpod_detect(image_dir, conf_thres=0.35):
+def iwpod_detect(image_dir: str, conf_thres: float = 0.35) -> list:
     files = [file for file in os.listdir(image_dir) if file.endswith("jpg")
              or file.endswith("jpeg")]
     detection_in_images = list()

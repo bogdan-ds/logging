@@ -7,11 +7,11 @@ from PIL import Image
 
 from sqlalchemy.orm import sessionmaker
 
-from logtrucks.schema import Detections, engine
-from logtrucks.utils import get_uuid_from_filename, is_lp_valid
-from logtrucks.ocr.dataset import AlignCollate
-from logtrucks.ocr.model import Model
-from logtrucks.ocr.utils import CTCLabelConverter, AttrDict
+from src.logtrucks.schema import Detections, engine
+from src.logtrucks.utils import get_uuid_from_filename, is_lp_valid
+from src.logtrucks.ocr.dataset import AlignCollate
+from src.logtrucks.ocr.model import Model
+from src.logtrucks.ocr.utils import CTCLabelConverter, AttrDict
 
 
 package_directory = os.path.dirname(os.path.abspath(__file__))
@@ -19,7 +19,7 @@ package_directory = os.path.dirname(os.path.abspath(__file__))
 
 class OCRecognizer:
 
-    def __init__(self, settings):
+    def __init__(self, settings: dict):
         self.settings = settings
         self.path = os.path.join(package_directory, "weights",
                                  settings["ocr_weights"])
@@ -27,19 +27,19 @@ class OCRecognizer:
         self.converter = CTCLabelConverter(self.opt.character_list)
         self.device = self.get_device()
 
-    def get_config(self):
+    def get_config(self) -> AttrDict:
         with open(self.path + ".yaml", "r", encoding="utf-8") as f:
             opt = yaml.safe_load(f)
         opt = AttrDict(opt)
         return opt
 
-    def get_device(self):
+    def get_device(self) -> torch.device:
         cuda = False
         if torch.cuda.is_available():
             cuda = True
         return torch.device("cuda:0" if cuda else "cpu")
 
-    def read(self, images_with_lps):
+    def read(self, images_with_lps: list) -> list:
         model = self.load_model()
         results = list()
         for image in images_with_lps:
@@ -59,7 +59,7 @@ class OCRecognizer:
                 results.append(lp)
         return results
 
-    def load_model(self):
+    def load_model(self) -> Model:
         self.opt.num_class = len(self.converter.character)
         model = Model(self.opt)
         original_dict = torch.load(self.path + ".pth",
@@ -70,7 +70,7 @@ class OCRecognizer:
         model.load_state_dict(new_dict)
         return model
 
-    def predict(self, image, model):
+    def predict(self, image: str, model: Model) -> str:
         align_collate = AlignCollate(imgH=self.opt.imgH,
                                      imgW=self.opt.imgW,
                                      keep_ratio_with_pad=True,
@@ -88,7 +88,7 @@ class OCRecognizer:
                                                          predictions_size.data)
         return prediction_string
 
-    def update_db_with_lp(self, uuid, lp_prediction):
+    def update_db_with_lp(self, uuid: str, lp_prediction: str) -> None:
         session = sessionmaker(bind=engine)
         session = session()
         session.query(Detections).filter(

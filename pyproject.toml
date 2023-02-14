@@ -1,7 +1,8 @@
 [tool.poetry]
 name = "logtrucks"
 version = "0.1.0"
-description = ""
+description = "Detecting logs on trucks and reading their license plate from media files"
+license = "MIT"
 authors = ["Bogdan Despotov <despotov@gmail.com>"]
 readme = "README.md"
 
@@ -19,8 +20,15 @@ google-api-python-client = "^2.74.0"
 tqdm = "^4.64.1"
 streamlit = "1.5.0"
 click = "8.0.4"
+torch = "1.12.1"
+torchvision = "0.13.1"
+matplotlib = "3.6.0"
+seaborn = "0.12.0"
 
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+logs = "logtrucks.main:cli"
