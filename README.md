@@ -2,7 +2,7 @@
 ![](screenshots/truck.jpg)
 
 I created this small app to help process long video files in search of logging trucks. Ideally this would aid efforts 
-to combat illegal logging. This repository includes two models which were fine-tuned by me with data collect from the 
+to combat illegal logging. This repository includes two models which were fine-tuned by me with data collected from the 
 public photo register of the [South-Western State Enterprise](https://www.fotoregister.uzdp.bg/public). 
 The fine-tuned models are:
  - Object detection: [YOLOv7](https://github.com/WongKinYiu/yolov7) by Wong Kin Yiu.
@@ -65,7 +65,7 @@ poetry run logs -f tests/assets/127.jpeg
 poetry run logs -f tests/assets/clip2.mp4
 ```
 
-Result in as seen in the Streamlit frontend:
+Results as seen in the Streamlit frontend:
 
 ![](screenshots/examples.png)
 
@@ -81,7 +81,7 @@ dl.start_detections("tests/assets/clip2.mp4")
 Streamlit Frontend
 ------------------
 
-A small streamlit app is included in the repo in order to visalise the contents of the SQLite database. The default 
+A small streamlit app is included in the repo in order to visualise the contents of the SQLite database. The default 
 db name is hardcoded in it. It will look for `logtrucks.db` in the project root and the default table name `detections`.
 
 Run using:
